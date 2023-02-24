@@ -7,12 +7,18 @@ from tqdm import tqdm
 import copy
 
 def train(X_train, t_train, e_train, X_val, t_val, e_val, X_test, t_test, e_test,
-         learning_rate, epochs) :
+         a, lr, l2, epochs, dropout_rates, optimizer) :
     
-    net = test_model(len(X_train[0]))
+    net = test_model(len(X_train[0]), a, dropout_rates)
     if torch.cuda.is_available():
         net.cuda()
-    opt = optim.Adam(net.parameters(), lr = learning_rate, weight_decay = 0.2)
+    
+    if optimizer == "Adam" :
+        opt = optim.Adam(net.parameters(), lr = lr, weight_decay = l2)
+    
+    elif optimizer == "NAdam" :
+        opt = optim.NAdam(net.parameters(), lr = lr, weight_decay = l2)
+        
     train_cost = []
     val_cost = []
     best_val_cost = np.inf
@@ -34,12 +40,14 @@ def train(X_train, t_train, e_train, X_val, t_val, e_val, X_test, t_test, e_test
         
             if (best_val_cost > val_loss) :
                 best_val_cost = val_loss
-                best_model = copy.deepcopy(net)  
-                torch.save(net.state_dict(), './models/' + str(epoch))
+                val_cindex = c_index(val_pred, t_val, e_val)
+                best_model = copy.deepcopy(net)
+                torch.save(best_model.state_dict(), './models1/' + str(val_cindex.detach().numpy()) + '_' + str(a) + '_' + str(lr) + '_' + str(l2) + '_' + str(dropout_rates) + '_' + str(optimizer) + '_' + str(epoch))
         # print('train_loss = ', train_loss, 'val_loss = ', val_loss)
     
     best_model.eval()
     test_pred = best_model(X_test)
     test_cindex = c_index(test_pred, t_test, e_test)
+    torch.save(best_model.state_dict(), './models1/'  + str(test_cindex.detach().numpy()) + '_' + str(a) + '_' + str(lr) + '_' + str(l2) + '_' + str(dropout_rates) + '_' + str(optimizer) + '_' + str(epoch))
     
     return train_cost, val_cost, test_cindex
