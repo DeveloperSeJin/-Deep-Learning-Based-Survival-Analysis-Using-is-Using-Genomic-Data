@@ -1,13 +1,13 @@
-from Survival_CostFunc_CIndex import *
+from model.Survival_CostFunc_CIndex import *
 import torch
-from DataLoader import load_data
-from Model import test_model
+from model.DataLoader import load_data
+#from model.Model import model
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-def draw_learning-rate(train_cost, val_cost, name) :
+def draw_learning_rate(train_cost, val_cost, name) :
     #train_cost = train_cost.numpy()
     train_cost = torch.tensor(train_cost).detach().numpy()
     # #val_cost = val_cost.numpy()
@@ -18,7 +18,7 @@ def draw_learning-rate(train_cost, val_cost, name) :
     plt.xlabel('epoch')
     plt.ylabel('cost')
     plt.legend(['train', 'val'])    
-    plt.savefig('LearningCurve1/' + name + '.png')
+    plt.savefig('./analysis/' + name + '.png')
     plt.clf()
     
 def createCIndexArray() :
@@ -49,7 +49,5 @@ def calculateCIndex(cindexes, name) :
     plt.boxplot(cindexes)
     plt.xlabel('type')
     plt.ylabel('value')   
-    plt.savefig('./Analysis/' + name + '.png')
+    plt.savefig('./Analysis/' + name + '_cindex.png')
     plt.clf()
-            
-createCIndexArray()
