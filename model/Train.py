@@ -32,20 +32,8 @@ def train(X_train, t_train, e_train, X_val, t_val, e_val, X_test, t_test, e_test
     #best_val_cost = np.inf
     
     #best_model = copy.deepcopy(net)
-    
-#     dataset = TensorDataset(X_train, t_train, e_train)
-#     dataloader = DataLoader(dataset, batch_size=50, shuffle=True)
-    
-    for epoch in tqdm(range(epochs)) :
-#        for batch_idx, samples in enumerate(dataloader):
-#             Xs_train, ts_train, es_train = samples
-#             net.train()
-#             train_pred = net(Xs_train)
-#             print(train_pred)
-#             train_loss = neg_par_log_likelihood(train_pred, ts_train, es_train)
-#             train_loss.backward()
-#             opt.step()
 
+    for epoch in tqdm(range(epochs)) :
         net.train()
         opt.zero_grad()
         pred = net(X_train)
@@ -63,24 +51,7 @@ def train(X_train, t_train, e_train, X_val, t_val, e_val, X_test, t_test, e_test
             val_pred = net(X_val)
             val_loss = neg_par_log_likelihood(val_pred, t_val, e_val).view(1,)
             val_cost.append(val_loss)
-            
-#             if (epoch % 200 == 0 and batch_idx == 1) :
-#                 net.train()
-#                 train_pred = net(Xs_train)
-#                 train_loss = neg_par_log_likelihood(train_pred, ts_train, es_train).view(1,)
-#                 train_cost.append(train_loss)
-            
-#                 net.eval()
-#                 val_pred = net(X_val)
-#                 val_loss = neg_par_log_likelihood(val_pred, t_val, e_val).view(1,)
-#                 val_cost.append(val_loss)
-        
-#             if (best_val_cost > val_loss) :
-#                 best_val_cost = val_loss
-#                 val_cindex = c_index(val_pred, t_val, e_val)
-#                 best_model = copy.deepcopy(net)
-                #torch.save(best_model.state_dict(), './'+ model + '/' + str(val_cindex.detach().numpy()) + '_' + str(a) + '_' + str(lr) + '_' + str(l2) + '_' + str(dropout_rates) + '_' + str(optimizer) + '_' + str(epoch))
-        # print('train_loss = ', train_loss, 'val_loss = ', val_loss)
+ 
     net.eval()
     test_pred = net(X_test)
     test_cindex = c_index(test_pred, t_test, e_test)
