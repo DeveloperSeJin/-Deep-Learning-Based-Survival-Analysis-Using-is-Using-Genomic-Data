@@ -5,8 +5,8 @@ class model_add_layer(nn.Module) :
     def __init__(self, input_layer, activation, dropout_rates) :
         super().__init__()
         
-        hidden_node1 = 1000
-        hidden_node2 = 500
+        hidden_node1 = 3000
+        hidden_node2 = 700
         hidden_node3 = 250
         output_node = 1
         
@@ -32,6 +32,6 @@ class model_add_layer(nn.Module) :
         x = self.dropout(x)
         x = self.activation(self.hidden3(x))
         x = self.dropout(x)
-        x = self.output(x)
+        x_result = self.output(x)
         
-        return x
+        return x_result

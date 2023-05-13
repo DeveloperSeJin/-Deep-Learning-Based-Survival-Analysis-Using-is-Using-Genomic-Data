@@ -6,12 +6,15 @@ import torch
 import numpy as np
 from tqdm import tqdm
 import copy
+from torch.utils.data import TensorDataset # 텐서데이터셋
+from torch.utils.data import DataLoader # 데이터로더
 
 def train(X_train, t_train, e_train, X_val, t_val, e_val, X_test, t_test, e_test,
          a, lr, l2, epochs, dropout_rates, optimizer = 'Adam', model_name = 'model') :
     
     if model_name == 'model_add_layer' :
         net = model_add_layer(len(X_train[0]), a, dropout_rates)
+        print('model_add_layer')
     else :
         net = model(len(X_train[0]), a, dropout_rates)
         
@@ -26,33 +29,66 @@ def train(X_train, t_train, e_train, X_val, t_val, e_val, X_test, t_test, e_test
         
     train_cost = []
     val_cost = []
-    best_val_cost = np.inf
+    #best_val_cost = np.inf
+    
+    #best_model = copy.deepcopy(net)
+    
+#     dataset = TensorDataset(X_train, t_train, e_train)
+#     dataloader = DataLoader(dataset, batch_size=50, shuffle=True)
     
     for epoch in tqdm(range(epochs)) :
+#        for batch_idx, samples in enumerate(dataloader):
+#             Xs_train, ts_train, es_train = samples
+#             net.train()
+#             train_pred = net(Xs_train)
+#             print(train_pred)
+#             train_loss = neg_par_log_likelihood(train_pred, ts_train, es_train)
+#             train_loss.backward()
+#             opt.step()
+
         net.train()
-        train_pred = net(X_train)
-        train_loss = neg_par_log_likelihood(train_pred, t_train, e_train)
-        train_cost.append(train_loss)
-        train_loss.backward()
         opt.zero_grad()
+        pred = net(X_train)
+        train_loss = neg_par_log_likelihood(pred, t_train, e_train)
+        train_loss.backward()
         opt.step()
+        
+        if (epoch % 200 == 0) :
+            net.train()
+            train_pred = net(X_train)
+            train_loss = neg_par_log_likelihood(train_pred, t_train, e_train).view(1,)
+            train_cost.append(train_loss)
             
-        if (epochs % 20 == 0) :
             net.eval()
             val_pred = net(X_val)
-            val_loss = neg_par_log_likelihood(val_pred, t_val, e_val)
+            val_loss = neg_par_log_likelihood(val_pred, t_val, e_val).view(1,)
             val_cost.append(val_loss)
+            
+#             if (epoch % 200 == 0 and batch_idx == 1) :
+#                 net.train()
+#                 train_pred = net(Xs_train)
+#                 train_loss = neg_par_log_likelihood(train_pred, ts_train, es_train).view(1,)
+#                 train_cost.append(train_loss)
+            
+#                 net.eval()
+#                 val_pred = net(X_val)
+#                 val_loss = neg_par_log_likelihood(val_pred, t_val, e_val).view(1,)
+#                 val_cost.append(val_loss)
         
-            if (best_val_cost > val_loss) :
-                best_val_cost = val_loss
-                val_cindex = c_index(val_pred, t_val, e_val)
-                best_model = copy.deepcopy(net)
+#             if (best_val_cost > val_loss) :
+#                 best_val_cost = val_loss
+#                 val_cindex = c_index(val_pred, t_val, e_val)
+#                 best_model = copy.deepcopy(net)
                 #torch.save(best_model.state_dict(), './'+ model + '/' + str(val_cindex.detach().numpy()) + '_' + str(a) + '_' + str(lr) + '_' + str(l2) + '_' + str(dropout_rates) + '_' + str(optimizer) + '_' + str(epoch))
         # print('train_loss = ', train_loss, 'val_loss = ', val_loss)
-    
-    best_model.eval()
-    test_pred = best_model(X_test)
+    net.eval()
+    test_pred = net(X_test)
     test_cindex = c_index(test_pred, t_test, e_test)
-    torch.save(best_model.state_dict(), './save_model/'  + str(test_cindex.detach().cpu().numpy()) + '_' + str(a) + '_' + str(lr) + '_' + str(l2) + '_' + str(dropout_rates) + '_' + str(optimizer) + '_' + str(epoch) + '_' + model_name)
+    torch.save(net.state_dict(), './save_model/'  + str(test_cindex.detach().cpu().numpy()) + '_' + model_name)
+    
+#     best_model.eval()
+#     test_pred = best_model(X_test)
+#     test_cindex = c_index(test_pred, t_test, e_test)
+#     torch.save(best_model.state_dict(), './save_model/'  + str(test_cindex.detach().cpu().numpy()) + '_' + str(a) + '_' + str(lr) + '_' + str(l2) + '_' + str(dropout_rates) + '_' + str(optimizer) + '_' + str(epoch) + '_' + model_name)
     
     return train_cost, val_cost, test_cindex
