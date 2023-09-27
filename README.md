@@ -8,6 +8,7 @@
 ## Publication
 ------------
 SeJin Park, JuYong Seong, DongHyu Choi, SungChul Lee, Deep-Learning-Based-Survival-Analysis-Using-Genomic-Data, Digital Contents Society Summer Academic Conference and University student paper competition, Jun. 2023, Jeju City. Jeju Province. Korea (Selected grand prize)
+
 [paper]: https://drive.google.com/file/d/1N4JGOFHrYiRaHsHkTnBMn39cgM5jabFA/view
 
 <div align="center">
