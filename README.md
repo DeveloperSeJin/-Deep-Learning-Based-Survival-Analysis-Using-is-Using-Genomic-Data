@@ -1,4 +1,4 @@
-# Deep-Learning-Based-Survival-Analysis-Using-is-Using-Genomic-Data
+# Deep-Learning-Based-Survival-Analysis-Using-Genomic-Data
 
 ------------
 ## Abstract
