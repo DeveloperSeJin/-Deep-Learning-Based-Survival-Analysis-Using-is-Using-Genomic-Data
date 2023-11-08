@@ -5,13 +5,12 @@ class model(nn.Module) :
     def __init__(self, input_layer, activation, dropout_rates) :
         super().__init__()
         
-        hidden_node1 = 1000
-        hidden_node2 = 500
+        hidden_node = 143
         output_node = 1
         
-        self.hidden1 = nn.Linear(input_layer, hidden_node1)
-        self.hidden2 = nn.Linear(hidden_node1, hidden_node2)
-        self.output = nn.Linear(hidden_node2, output_node, bias = False)
+        self.hidden1 = nn.Linear(input_layer, hidden_node)
+        self.output = nn.Linear(hidden_node, output_node, bias = False)
+
         if activation == "ReLU":
             self.activation = nn.ReLU()
         elif activation == "Sigmoid":
@@ -23,8 +22,6 @@ class model(nn.Module) :
         
     def forward(self, x):
         x = self.activation(self.hidden1(x))
-        x = self.dropout(x)
-        x = self.activation(self.hidden2(x))
         x = self.dropout(x)
         x = self.output(x)
         

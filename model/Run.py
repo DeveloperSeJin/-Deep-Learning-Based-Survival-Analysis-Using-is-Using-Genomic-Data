@@ -17,11 +17,11 @@ def run() :
     learning_rate = [0.9]
     regularization = [0.7]
     act = ["Tanh"]
-    dropout_rates = [0.1]
+    dropout_rates = [0.0775]
     optimizers = ["NAdam"]
     
     lr = 0.9
-    r2 = 0.7
+    l2 = 0.7
     a = "Tanh"
     dropout_rate = 0.1
     optimizer = "NADam"
@@ -35,10 +35,10 @@ def run() :
     
     #for a in act :
         #for lr in learning_rate:
-            #for r2 in regularization:
+            #for l2 in regularization:
                 #for dropout_rate in dropout_rates :
                     #for optimizer in optimizers :
-    train_cost, val_cost, test_cindex = train(X_train, t_train, e_train, X_val, t_val, e_val, X_test, t_test, e_test, a, lr, r2, epochs, dropout_rate, optimizer)
+    train_cost, val_cost, test_cindex = train(X_train, t_train, e_train, X_val, t_val, e_val, X_test, t_test, e_test, a, lr, l2, epochs, dropout_rate, optimizer)
     draw_learning(train_cost, val_cost, str(a) + '_' + str(lr) + '_' + str(l2) + '_' + str(dropout_rate) + '_' + str(optimizer))
                         
-    return test_cindex, model
+    return test_cindex

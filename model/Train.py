@@ -21,45 +21,53 @@ def train(X_train, t_train, e_train, X_val, t_val, e_val, X_test, t_test, e_test
     if torch.cuda.is_available():
         net.cuda()
         print('net is operated by cuda')
-    
-    opt = optim.Adam(net.parameters(), lr = lr, weight_decay = l2)
-    
+
     if optimizer == "NAdam" :
         opt = optim.NAdam(net.parameters(), lr = lr, weight_decay = l2)
-        
+    if optimizer == "Adam" :
+        opt = optim.Adam(net.parameters(), lr = lr, weight_decay = l2)
+    if optimizer == "AdamW" :
+        opt = optim.AdamW(net.parameters(), lr = lr, weight_decay = l2)
+    else:
+        opt = optim.SGD(net.parameters() , lr= lr, weight_decay=l2)
+
     train_cost = []
     val_cost = []
-    #best_val_cost = np.inf
+    best_val_cost = np.inf
     
-    #best_model = copy.deepcopy(net)
+    best_model = copy.deepcopy(net)
 
     for epoch in tqdm(range(epochs)) :
         net.train()
         opt.zero_grad()
         pred = net(X_train)
         train_loss = neg_par_log_likelihood(pred, t_train, e_train)
-        train_loss.backward()
-        opt.step()
+        
         
         if (epoch % 200 == 0) :
-            net.train()
-            train_pred = net(X_train)
-            train_loss = neg_par_log_likelihood(train_pred, t_train, e_train).view(1,)
             train_cost.append(train_loss)
-            
+            train_loss.backward()
+            opt.step()
+
             net.eval()
             val_pred = net(X_val)
-            val_loss = neg_par_log_likelihood(val_pred, t_val, e_val).view(1,)
+            val_loss = neg_par_log_likelihood(val_pred, t_val, e_val)
             val_cost.append(val_loss)
+            if best_val_cost > val_loss:
+                best_val_cost = val_loss
+                best_model = copy.deepcopy(net)
+        else:
+            train_loss.backward()
+            opt.step()
  
-    net.eval()
-    test_pred = net(X_test)
-    test_cindex = c_index(test_pred, t_test, e_test)
-    torch.save(net.state_dict(), './save_model/'  + str(test_cindex.detach().cpu().numpy()) + '_' + model_name)
+    # net.eval()
+    # test_pred = net(X_test)
+    # test_cindex = c_index(test_pred, t_test, e_test)
+    # torch.save(net.state_dict(), './save_model/'  + str(test_cindex.detach().cpu().numpy()) + '_' + model_name)
     
-#     best_model.eval()
-#     test_pred = best_model(X_test)
-#     test_cindex = c_index(test_pred, t_test, e_test)
-#     torch.save(best_model.state_dict(), './save_model/'  + str(test_cindex.detach().cpu().numpy()) + '_' + str(a) + '_' + str(lr) + '_' + str(l2) + '_' + str(dropout_rates) + '_' + str(optimizer) + '_' + str(epoch) + '_' + model_name)
+    best_model.eval()
+    test_pred = best_model(X_test)
+    test_cindex = c_index(test_pred, t_test, e_test)
+    torch.save(best_model.state_dict(), './save_model/' + str(a) + '_' + str(lr).replace('.','') + '_' + str(l2).replace('.','') + '_' + str(dropout_rates).replace('.','') + '_' + str(optimizer))
     
     return train_cost, val_cost, test_cindex
